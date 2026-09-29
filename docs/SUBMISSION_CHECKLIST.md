@@ -32,6 +32,7 @@ repository or the public network, it is marked as such rather than checked off.
 |---|---|---|---|
 | 11 | Contract **verifiable** on-chain | PASS | Contract ID `d7016be7…e39bed` queried against the public Preprod indexer (`https://indexer.preprod.midnight.network/api/v4/graphql`). Returns deploy transaction id `624845`, hash `ec1e9bc5388bd187638f69c09d01106a7dd4df9349c6be8e7eba372bc85d214a`, block `2692270`, deployed 2026-09-24 17:34:54 UTC. All 7 circuit names are recoverable from the returned on-chain state (15,506 bytes), so the address is the Kredit contract and not an empty deployment. Copy-paste `curl` in the README; capture in `screenshots/contract-verified.png`. |
 | 12 | Successful compile listing circuits | PASS | `npm run compact` → `Compiling 7 circuits:` with Compact compiler 0.31.1 / language 0.23.0 / runtime 0.16.0, generating 7 prover + 7 verifier keypairs. Terminal capture in `screenshots/compile-output.png`, embedded in the README's Contract Details section. |
+| 13 | Product X profile linked in README | PASS | [@agentkredit_](https://x.com/agentkredit_) — linked from the README badge row, the Live Demo & Video section, and the Submission checklist. |
 
 ---
 

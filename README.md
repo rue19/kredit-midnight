@@ -6,6 +6,7 @@
 
 [![CI](https://github.com/rue19/kredit-midnight/actions/workflows/ci.yml/badge.svg)](https://github.com/rue19/kredit-midnight/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![X (Twitter)](https://img.shields.io/badge/X-@agentkredit__-000000?logo=x&logoColor=white)](https://x.com/agentkredit_)
 
 ---
 
@@ -48,6 +49,9 @@ deployment:
 ## Live Demo & Video
 
 **Live Demo:** [https://kredit-midnight-frontend.vercel.app](https://kredit-midnight-frontend.vercel.app)
+
+**X Profile:** [@agentkredit_](https://x.com/agentkredit_)
+
 [![frontend](image.png)](https://kredit-midnight-frontend.vercel.app)
 
 **Walkthrough Video:**
@@ -409,6 +413,7 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 - [x] Privacy model with selective disclosure, including known limitations
 - [x] CI/CD pipeline green on `main` — [run 36177151325](https://github.com/rue19/kredit-midnight/actions/runs/36177151325)
 - [x] Demo walkthrough video — [watch on YouTube](https://youtu.be/u_vi6gyc3AA)
+- [x] Product X profile — [@agentkredit_](https://x.com/agentkredit_)
 - [x] Documentation (README, architecture, privacy model, toolchain, proposal, demo script)
 
 Requirement-by-requirement status, with the exact command or endpoint used to
