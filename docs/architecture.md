@@ -52,6 +52,6 @@ Shared TypeScript types and provider configuration for Midnight.js integration.
 
 ## Deployment
 
-- Contract: Compiled and deployed to Midnight Preprod
+- Contract: Compiled and deployed to Midnight Preview
 - Frontend: Deployed to Vercel/Netlify
 - Proof Server: Local Docker on port 6300 (or wallet-hosted)

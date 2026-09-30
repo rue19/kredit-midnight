@@ -35,7 +35,7 @@ Kredit Protocol leverages this to issue **private numeric credentials** — a co
 
 ## MVP Scope
 
-- **Smart contract** deployed on Midnight Preprod
+- **Smart contract** deployed on Midnight Preview
 - **7 ZK circuits:**
   1. Admin key rotation
   2. Issuer registration
@@ -66,7 +66,7 @@ Kredit Protocol leverages this to issue **private numeric credentials** — a co
 
 ## Success Metrics
 
-- 1+ deployed contract on Midnight Preprod
+- 1+ deployed contract on Midnight Preview
 - 15+ passing tests (unit + integration)
 - Green CI pipeline on every push
 - Working Vercel demo with live issuer/user/verifier flows

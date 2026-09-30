@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-19
 
-## Supported Versions (Midnight Preprod Network)
+## Supported Versions (Midnight Preview Network)
 
 | Component | Version | Source |
 |---|---|---|

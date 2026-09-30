@@ -18,7 +18,7 @@ Total runtime: 60 seconds. Shot-by-shot breakdown below.
 **On screen:** The view switches to the Issuer Console tab. The user clicks "Deploy New Credential Contract." A loading spinner appears. After a moment, a success toast notification shows the contract address and a green checkmark. The contract details populate a table row below.
 
 **Narration:**
-"From the Issuer Console, deploy a credential contract to the Midnight Preprod testnet. Instant deployment, confirmed on-chain."
+"From the Issuer Console, deploy a credential contract to the Midnight Preview testnet. Instant deployment, confirmed on-chain."
 
 ---
 

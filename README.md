@@ -14,27 +14,27 @@
 
 | Field | Value |
 |---|---|
-| **Contract ID** | `d7016be782218a515837a816c7e993131a8cc4272ea7ad05d061d4b2b6e39bed` |
-| **Network** | Midnight Preprod |
+| **Contract ID** | `100a124ea5720fd20be81b2e8a23d1ebdb800a1df54c5694053344542d72cbae` |
+| **Network** | Midnight Preview |
 | **Name** | `kredit` |
 | **Circuits** | `rotateAdmin`, `registerIssuer`, `unregisterIssuer`, `issueCredential`, `revokeCredential`, `proveEligibility`, `proveNotRevoked` |
 | **Runtime** | 0.16.0 |
 | **Contract Language** | Compact 0.23 |
-| **Deploy transaction** | id `624845` — hash `ec1e9bc5388bd187638f69c09d01106a7dd4df9349c6be8e7eba372bc85d214a` |
-| **Deploy block** | `2692270` — `5845bc22175868999776d3833b25e8c857a248af676d336b066b2c241454a393` — 2026-09-24 17:34:54 UTC |
+| **Deploy transaction** | id `69824` — hash `5436fc012e1f39ffa43b7d762b5bc1359d627eb87d0cab178f9c37fb6eea5cb1` |
+| **Deploy block** | `1094557` — 2026-09-30 16:33:36 UTC |
 
-The contract is compiled from `contract/src/kredit.compact` and deployed on Midnight Preprod. The same contract ID is used by every page of the frontend (`issuer`, `user`, `verify`); the deployed address is remembered by the Issuer Console and reused by the User and Verifier views.
+The contract is compiled from `contract/src/kredit.compact` and deployed on Midnight Preview. The same contract ID is used by every page of the frontend (`issuer`, `user`, `verify`); the deployed address is remembered by the Issuer Console and reused by the User and Verifier views.
 
 ### Verify it yourself
 
-Preprod has no public block-explorer page for contract state, but the public
+Preview has no public block-explorer page for contract state, but the public
 indexer is open — anyone can confirm the contract exists on-chain without
 trusting this README:
 
 ```bash
-curl -s -X POST https://indexer.preprod.midnight.network/api/v4/graphql \
+curl -s -X POST https://indexer.preview.midnight.network/api/v4/graphql \
   -H 'Content-Type: application/json' \
-  -d '{"query":"query V($a:HexEncoded!){contractAction(address:$a){... on ContractDeploy{state transaction{id hash block{height timestamp}}}}}","variables":{"a":"d7016be782218a515837a816c7e993131a8cc4272ea7ad05d061d4b2b6e39bed"}}'
+  -d '{"query":"query V($a:HexEncoded!){contractAction(address:$a){... on ContractDeploy{state transaction{id hash block{height timestamp}}}}}","variables":{"a":"100a124ea5720fd20be81b2e8a23d1ebdb800a1df54c5694053344542d72cbae"}}'
 ```
 
 This returns the deploy transaction and the contract's on-chain state. All
@@ -42,7 +42,7 @@ seven circuit names (`rotateAdmin` … `proveNotRevoked`) are present in that
 state, so the address is the Kredit contract and not an empty or unrelated
 deployment:
 
-![Contract verified against the Midnight Preprod indexer](screenshots/contract-verified.png)
+![Contract verified against the Midnight Preview indexer](screenshots/contract-verified.png)
 
 ---
 
@@ -91,7 +91,7 @@ An issuer (e.g., a bank) issues a credential commitment on-chain. The user holds
                        │              │
                        ▼              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    LACE WALLET (Preprod)                         │
+│                    LACE WALLET (Preview)                         │
 │    holds keys · signs txs · generates ZK proofs internally      │
 └──────────────────────────────┬──────────────────────────────────┘
                                │
@@ -104,7 +104,7 @@ An issuer (e.g., a bank) issues a credential commitment on-chain. The user holds
 
 ### The Flow
 
-1. **Deploy** — Admin deploys the Kredit contract on Midnight Preprod.
+1. **Deploy** — Admin deploys the Kredit contract on Midnight Preview.
 2. **Register Issuer** — Admin registers trusted issuers (banks, KYC providers).
 3. **Issue Credential** — Issuer issues a credential commitment (`persistentCommit(score, salt)`). The raw score never touches the chain.
 4. **User Holds Secrets** — The user's score, salt, and keys are stored locally in the browser.
@@ -194,7 +194,7 @@ An issuer (e.g., a bank) issues a credential commitment on-chain. The user holds
 | Compact Runtime | 0.16.0 |
 | Midnight.js | 4.1.1 |
 | DApp Connector API | 4.0.1 |
-| Wallet | Lace (Midnight Preprod build, Chrome extension) |
+| Wallet | Lace (Midnight Preview network, Chrome extension) |
 | SDK | `@midnight-ntwrk/midnight-js-*` |
 | Frontend | Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 |
 | Tests | Vitest + `@midnight-ntwrk/compact-runtime` simulator |
@@ -208,7 +208,9 @@ An issuer (e.g., a bank) issues a credential commitment on-chain. The user holds
 - **Node.js** v22+
 - **Docker** (running, for proof server)
 - **Compact toolchain** (`compact update 0.31.1`)
-- **Lace wallet** (Midnight Preprod build, Chrome extension) with Developer Mode enabled
+- **Lace wallet** (Chrome extension) on the Midnight Preview network, with Developer Mode enabled
+- **Midnight proof server** on `localhost:6300` — Lace uses it to prove the fee (DUST) part of every transaction:
+  `docker run -d -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v`
 
 ---
 
@@ -236,9 +238,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Wallet Setup
 
-1. Install the **Lace wallet** Chrome extension (Midnight Preprod build)
+1. Install the **Lace wallet** Chrome extension
 2. Enable **Developer Mode** in Lace wallet settings
-3. Switch to the **Midnight Preprod** network
+3. Switch to the **Midnight Preview** network
 4. Ensure your wallet has shielded keys initialized
 
 ---
@@ -288,13 +290,18 @@ kredit-midnight/
 │   └── src/index.ts                    # Shared types
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx                    # Landing page with dithering shader
-│   │   ├── issuer/page.tsx             # Issuer Console (deploy, register, issue, revoke)
-│   │   ├── user/page.tsx               # User View (key generation, eligibility proof)
-│   │   └── verify/page.tsx             # Verifier View
+│   │   ├── page.tsx                    # Landing page: hero, boundary, roles, FAQ, footer
+│   │   ├── (app)/layout.tsx            # App shell (rail navigation, network panel)
+│   │   ├── (app)/issuer/page.tsx       # Issuer Console (deploy, register, issue, revoke)
+│   │   ├── (app)/user/page.tsx         # Holder view (key generation, eligibility proof)
+│   │   ├── (app)/verify/page.tsx       # Verifier view
+│   │   └── api/                        # Indexer proxies: network status, contract ledger
 │   ├── components/
-│   │   ├── ConnectWalletButton.tsx     # Wallet connect button
-│   │   └── ui/dithering-shader.tsx     # WebGL animation
+│   │   ├── layout/                     # Landing navbar, hero, pillars, FAQ, footer
+│   │   ├── app/                        # Shell, contract panel, transaction progress
+│   │   ├── visual/                     # Particle field and 3D commitment orb (Canvas 2D)
+│   │   └── ui/console.tsx              # Form and page primitives
+│   ├── config/network.ts               # Midnight network selection (Preview by default)
 │   ├── lib/
 │   │   ├── wallet.tsx                  # useWallet() hook (Lace DApp Connector)
 │   │   ├── providers.ts                # Midnight SDK provider setup
@@ -317,7 +324,7 @@ kredit-midnight/
 │   ├── demo.png                        # Live demo capture
 │   ├── tests-passing.png               # Terminal capture: 15/15 tests passing
 │   ├── compile-output.png              # Terminal capture: 7 circuits compiled
-│   └── contract-verified.png           # Terminal capture: Preprod indexer query
+│   └── contract-verified.png           # Terminal capture: Preview indexer query
 ├── .github/workflows/ci.yml            # CI/CD pipeline
 ├── start-services.sh                   # Local dev startup script
 ├── .env.example
@@ -338,7 +345,8 @@ cp .env.example frontend/.env.local
 |---|---|---|
 | `PROOF_SERVER_URL` | `http://localhost:6300` | Midnight proof server URL, used only when the wallet connector doesn't expose `getProvingProvider` |
 | `NEXT_PUBLIC_ZK_ARTIFACTS_URL` | _(empty = same origin)_ | Client-side ZK artifacts URL (served from `frontend/public`) |
-| `NEXT_PUBLIC_CONTRACT_ADDRESS` | _(empty)_ | Address of the Kredit contract already deployed on Preprod. Without this set, a visitor who hasn't personally deployed a contract from the Issuer console (which stores the address in their own browser's `localStorage`) will see "No contract deployed" on the Verify/User pages. Deploy once via the Issuer console, copy the resulting address, and set this variable (locally in `.env.local`, and in Vercel's project settings for the live demo). |
+| `NEXT_PUBLIC_MIDNIGHT_NETWORK` | `preview` | Midnight network the frontend connects to (`preview` or `preprod`). Every network name, indexer URL and wallet request reads it from `frontend/config/network.ts`. |
+| `NEXT_PUBLIC_CONTRACT_ADDRESS` | _(empty)_ | Address of the Kredit contract already deployed on that network. Without this set, a visitor who hasn't personally deployed a contract from the Issuer console (which stores the address in their own browser's `localStorage`) will see "No contract deployed" on the Verify/User pages. Deploy once via the Issuer console, copy the resulting address, and set this variable (locally in `.env.local`, and in Vercel's project settings for the live demo). |
 
 ---
 
@@ -366,7 +374,7 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 ## Troubleshooting
 
 ### "No Midnight wallet detected"
-- Install the Lace wallet Chrome extension (Midnight Preprod build)
+- Install the Lace wallet Chrome extension
 - Enable **Developer Mode** in Lace wallet settings
 
 ### Connect wallet button (or anything else) does nothing when opened via a LAN address
@@ -375,7 +383,11 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 - After changing `next.config.ts`, restart the dev server
 
 ### "Network mismatch"
-- Open Lace wallet → Settings → Network → Switch to **Midnight Preprod**
+- Open Lace wallet → Settings → Network → Switch to **Midnight Preview**
+
+### "Lace refused the connection" / "Access to wallet api denied"
+- Lace answers *denied* when it is set to a different network than the one the site requests. Switch Lace to **Midnight Preview**, unlock it and approve the request
+- If you rejected the site earlier, remove it under Lace → Settings → Authorized DApps and connect again
 
 ### "Remote API ... was shutdown: object can no longer be used"
 - Chrome suspended the Lace extension's background service worker (Manifest V3 behavior after inactivity), which killed the page's connection channel to it
@@ -383,11 +395,15 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 
 ### "shielded coin public key is not available"
 - The wallet needs shielded keys initialized
-- Check if the wallet has completed initial setup on Preprod
+- Check if the wallet has completed initial setup on Preview
 
 ### Proof generation fails
 - Proofs are generated locally by the connected wallet (Lace) — the wallet must have
-  shielded keys initialized on the Midnight Preprod network
+  shielded keys initialized on the Midnight Preview network
+
+### "Balancing/signing in wallet failed … Failed to prove transaction"
+- Lace proves the transaction's fee (DUST) spend with its configured proof server, which defaults to `http://localhost:6300`. Start one (see *Prerequisites*) and check Lace → Settings → Midnight → Proof server
+- On first start the proof server downloads its proving keys; it only accepts requests once `curl localhost:6300/version` answers
 
 ### Compact compilation fails
 - Verify: `compact --version`
@@ -405,10 +421,10 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 
 **Checklist:**
 
-- [x] Compact contract with 7 circuits deployed on Preprod (runtime 0.16.0) — [verifiable on-chain](#deployed-contract)
+- [x] Compact contract with 7 circuits deployed on Preview (runtime 0.16.0) — [verifiable on-chain](#deployed-contract)
 - [x] 15 passing tests (Vitest + compact-runtime simulator) — [terminal capture](screenshots/tests-passing.png)
 - [x] Successful compile listing all 7 circuits — [terminal capture](screenshots/compile-output.png)
-- [x] Working frontend on Preprod (Next.js 16 + Lace wallet integration) — [live demo](https://kredit-midnight-frontend.vercel.app)
+- [x] Working frontend on Preview (Next.js 16 + Lace wallet integration) — [live demo](https://kredit-midnight-frontend.vercel.app)
 - [x] ZK proof generation for eligibility and revocation checks
 - [x] Privacy model with selective disclosure, including known limitations
 - [x] CI/CD pipeline green on `main` — [run 36177151325](https://github.com/rue19/kredit-midnight/actions/runs/36177151325)
