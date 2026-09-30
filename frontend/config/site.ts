@@ -9,5 +9,5 @@ export const site = {
   compact: "Compact 0.23",
   repo: "https://github.com/rue19/kredit-midnight",
   x: "https://x.com/agentkredit_",
-  video: "https://youtu.be/u_vi6gyc3AA",
+  video: "https://youtu.be/D3i3qV6nk5I",
 } as const;
