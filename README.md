@@ -52,19 +52,34 @@ deployment:
 
 **X Profile:** [@agentkredit_](https://x.com/agentkredit_)
 
-[![frontend](image.png)](https://kredit-midnight-frontend.vercel.app)
+[![Kredit landing page](screenshots/01-landing-hero.png)](https://kredit-midnight-frontend.vercel.app)
 
-**Walkthrough Video:**
+### Demo videos
 
-[![Kredit Protocol — Demo Walkthrough](https://img.youtube.com/vi/u_vi6gyc3AA/0.jpg)](https://youtu.be/u_vi6gyc3AA)
-
-> Click the thumbnail above (or [watch on YouTube](https://youtu.be/u_vi6gyc3AA)) for a full walkthrough: wallet setup, contract deployment, credential issuance, and a zero-knowledge eligibility proof.
-
-**Screenshots** (captured from the live deployment above):
-
-| Landing page | Issuer Console |
+| Demo 1 | Demo 2 |
 |---|---|
-| ![Landing page](screenshots/home.png) | ![Issuer Console](screenshots/issuer.png) |
+| [![KREDIT DEMO-1](https://img.youtube.com/vi/D3i3qV6nk5I/0.jpg)](https://youtu.be/D3i3qV6nk5I) | [![KREDIT DEMO-2](https://img.youtube.com/vi/dTyKZn2zE7M/0.jpg)](https://youtu.be/dTyKZn2zE7M) |
+| [Watch on YouTube](https://youtu.be/D3i3qV6nk5I) | [Watch on YouTube](https://youtu.be/dTyKZn2zE7M) |
+
+### Screenshots
+
+Captured from the frontend running against the Kredit contract on Midnight Preview.
+
+| Landing — hero | Landing — privacy boundary |
+|---|---|
+| ![Landing page hero](screenshots/01-landing-hero.png) | ![What crosses the boundary, with the 3D commitment orb](screenshots/02-landing-boundary.png) |
+
+| Landing — roles & FAQ | Issuer console |
+|---|---|
+| ![Three ways in and the FAQ](screenshots/03-landing-roles-faq.png) | ![Issuer console with the live contract panel](screenshots/04-issuer-console.png) |
+
+| Credential issued (1 credential, 1 issuer on-chain) | Transaction confirmed |
+|---|---|
+| ![Contract panel after issuing a credential](screenshots/05-issuer-credential-issued.png) | ![Transaction progress: prepare, prove, sign, submit, confirmed](screenshots/06-issuer-transaction-confirmed.png) |
+
+| Holder — eligibility proof | Verifier — signing in Lace |
+|---|---|
+| ![Holder page after a confirmed eligibility proof](screenshots/07-holder-eligibility-proof.png) | ![Verifier page with the Lace signing prompt](screenshots/08-verifier-lace-signing.png) |
 
 ---
 
@@ -319,9 +334,7 @@ kredit-midnight/
 │   ├── SUBMISSION_CHECKLIST.md         # Requirement-by-requirement status
 │   └── test-output.txt                 # Text copy of the last test run
 ├── screenshots/
-│   ├── home.png                        # Landing page
-│   ├── issuer.png                      # Issuer Console
-│   ├── demo.png                        # Live demo capture
+│   ├── 01-…08-*.png                    # Frontend on Midnight Preview (landing, issuer, holder, verifier)
 │   ├── tests-passing.png               # Terminal capture: 15/15 tests passing
 │   ├── compile-output.png              # Terminal capture: 7 circuits compiled
 │   └── contract-verified.png           # Terminal capture: Preview indexer query
@@ -428,7 +441,7 @@ Without `dist/` on disk, `tsc` fails with *"Cannot find module
 - [x] ZK proof generation for eligibility and revocation checks
 - [x] Privacy model with selective disclosure, including known limitations
 - [x] CI/CD pipeline green on `main` — [run 36177151325](https://github.com/rue19/kredit-midnight/actions/runs/36177151325)
-- [x] Demo walkthrough video — [watch on YouTube](https://youtu.be/u_vi6gyc3AA)
+- [x] Demo videos — [Demo 1](https://youtu.be/D3i3qV6nk5I) · [Demo 2](https://youtu.be/dTyKZn2zE7M)
 - [x] Product X profile — [@agentkredit_](https://x.com/agentkredit_)
 - [x] Documentation (README, architecture, privacy model, toolchain, proposal, demo script)
 
