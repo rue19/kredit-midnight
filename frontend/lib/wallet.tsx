@@ -1,5 +1,6 @@
 'use client';
 
+import { network } from '@/config/network';
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import type { InitialAPI, ConnectedAPI, Configuration } from '@midnight-ntwrk/dapp-connector-api';
 
@@ -59,23 +60,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const wallet = wallets[0];
       let connectedApi: ConnectedAPI;
       try {
-        console.log('[Wallet] Attempting to connect to preprod...');
-        connectedApi = await wallet.connect('preprod');
+        console.log(`[Wallet] Attempting to connect to ${network.id}...`);
+        connectedApi = await wallet.connect(network.id);
         console.log('[Wallet] Connected successfully');
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.error('[Wallet] Connection error:', msg);
+        // Handled below and shown in the UI; warn rather than error so the
+        // Next.js dev overlay doesn't treat a refused connection as a crash.
+        console.warn('[Wallet] Connection error:', msg);
         if (msg.includes('denied') || msg.includes('rejected')) {
+          // Lace also answers "denied" when it is set to a different network.
           throw new Error(
-            'Connection denied by wallet. Please open the Lace wallet extension, ' +
-            'go to Settings > DApps, and make sure connections are allowed. ' +
-            'You may also need to enable Developer Mode.'
+            `Lace refused the connection. Make sure Lace is unlocked and set to ${network.label} ` +
+            '(Settings > Network), with Developer Mode on, then approve the request. If you ' +
+            'rejected this site before, remove it under Settings > Authorized DApps and connect again.'
           );
         }
         if (msg.includes('mismatch') || msg.includes('network')) {
           throw new Error(
-            `Network mismatch: the wallet is on a different network than "preprod". ` +
-            `Open Lace wallet, go to Settings > Network, and switch to the Midnight Preprod network. ` +
+            `Network mismatch: the wallet is on a different network than "${network.id}". ` +
+            `Open Lace wallet, go to Settings > Network, and switch to the ${network.label} network. ` +
             `Original error: ${msg}`
           );
         }
@@ -91,7 +95,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       const status = await connectedApi.getConnectionStatus();
       if (status.status !== 'connected') {
-        throw new Error(`Wallet status: ${status.status}. Make sure you are connected to the Midnight Preprod network.`);
+        throw new Error(`Wallet status: ${status.status}. Make sure you are connected to the ${network.label} network.`);
       }
 
       const config = await connectedApi.getConfiguration();
