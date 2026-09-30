@@ -1,94 +1,298 @@
 @import "tailwindcss";
 
+/*
+  Kredit design tokens.
+
+  The fluid clamp() expressions resolve to their design size at a 1536px
+  viewport, then scale down from there.
+*/
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* --- surface --- */
+  --color-ground: #000000;
+  --color-raised: rgba(252, 252, 252, 0.016);
+
+  /* --- ink --- */
+  --color-cream: #e4dcc8; /* display type, CTA fill, pillar titles */
+  --color-cream-bright: #f0e8d8; /* navbar CTA fill */
+  --color-chalk: #fcfcfc; /* nav, wordmark, eyebrow, data values */
+  --color-muted: #9c9c9c; /* lede */
+  --color-faint: #8c8c8c; /* pillar body, labels */
+  --color-dim: #6e6e6e;
+
+  /* --- rules --- */
+  --color-hair: rgba(252, 252, 252, 0.13);
+  --color-hair-soft: rgba(252, 252, 252, 0.07);
+  --color-hair-strong: rgba(252, 252, 252, 0.85);
+
+  /* --- signal (used at most once per view) --- */
+  --color-violet: #6c29e8;
+  --color-signal: #3adf76;
+  --color-amber: #d9a441;
+
+  /* --- type scale --- */
+  --text-display: clamp(3.125rem, 10.09vw, 9.75rem);
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.045em;
+  --text-display--font-weight: 500;
+
+  --text-wordmark: clamp(0.9375rem, 1.628vw, 1.5625rem);
+  --text-nav: clamp(0.875rem, 1.237vw, 1.1875rem);
+  --text-lede: clamp(1rem, 1.432vw, 1.375rem);
+  --text-lede--line-height: 1.58;
+  --text-eyebrow: clamp(0.6875rem, 0.846vw, 0.8125rem);
+  --text-fine: clamp(0.8125rem, 0.977vw, 0.9375rem);
+  --text-pillar-num: clamp(0.875rem, 1.237vw, 1.1875rem);
+  --text-pillar-title: clamp(0.8125rem, 1.107vw, 1.0625rem);
+  --text-pillar-body: clamp(0.875rem, 1.042vw, 1rem);
+  --text-pillar-body--line-height: 1.42;
+  --text-label: clamp(0.6875rem, 0.781vw, 0.75rem);
+  --text-value: clamp(0.9375rem, 1.237vw, 1.1875rem);
+
+  /* --- horizontal gutter: 64px at 1536 --- */
+  --spacing-gutter: clamp(1.25rem, 4.167vw, 4rem);
+}
+
+/*
+  Vertical rhythm. Measured gaps from the reference, top to bottom.
+  Consumed as mt-(--gap-*) so the whole column scales as one system.
+*/
 :root {
-  --ink: #000000;
-  --panel: #11131f;
-  --panel-raised: #161829;
-  --line: #262a42;
-  --line-soft: #1a1d31;
-  --paper: #ececf3;
-  --dim: #8b8fab;
-  --dimmer: #565a73;
-  --signal: #9c8cff;
-  --signal-dim: #6f62b8;
-  --gold: #e7b75c;
-  --pass: #5fc98d;
-  --fail: #ef6f7b;
+  --gap-nav: clamp(1.25rem, 2.67vw, 2.5625rem); /* 41 */
+  --gap-eyebrow: clamp(1.75rem, 4.88vw, 4.6875rem); /* 75 */
+  --gap-head: clamp(0.5rem, 1.5vw, 1.4375rem); /* optical 23 */
+  --gap-lede: clamp(0.875rem, 1.56vw, 1.5rem); /* optical 24 */
+  --gap-cta: clamp(1.5rem, 2.73vw, 2.625rem); /* 42 */
+  --gap-fine: clamp(1rem, 1.69vw, 1.625rem); /* 26 */
+  --gap-pillars: clamp(2.75rem, 3.52vw, 3.375rem); /* 54 */
+  --pad-bottom: clamp(2rem, 3.45vw, 3.3125rem); /* 53 */
+  --card-bottom: clamp(1.5rem, 2.21vw, 2.125rem); /* 34 */
+  --pillar-gap: clamp(1.5rem, 3.65vw, 3.5rem); /* 56 */
 }
 
-@theme inline {
-  --color-ink: var(--ink);
-  --color-panel: var(--panel);
-  --color-panel-raised: var(--panel-raised);
-  --color-line: var(--line);
-  --color-line-soft: var(--line-soft);
-  --color-paper: var(--paper);
-  --color-dim: var(--dim);
-  --color-dimmer: var(--dimmer);
-  --color-signal: var(--signal);
-  --color-signal-dim: var(--signal-dim);
-  --color-gold: var(--gold);
-  --color-pass: var(--pass);
-  --color-fail: var(--fail);
-  --font-sans: var(--font-manrope);
-  --font-mono: var(--font-plex-mono);
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: var(--color-ground);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ground);
+    color: var(--color-chalk);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-cream);
+    color: var(--color-ground);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-cream);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  [id] {
+    scroll-margin-top: 6rem;
+  }
 }
 
-* {
-  border-color: var(--line);
-}
-
-html {
-  color-scheme: dark;
-}
-
-body {
-  background: var(--ink);
-  background-image:
-    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(156, 140, 255, 0.09), transparent 60%),
-    radial-gradient(ellipse 700px 400px at 100% 0%, rgba(231, 183, 92, 0.05), transparent 55%);
-  background-attachment: fixed;
-  color: var(--paper);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-::selection {
-  background: var(--signal);
-  color: var(--ink);
-}
-
-:focus-visible {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
-}
-
-/* A masked value — stands in for a secret that never crosses the boundary. */
-.redacted {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  background: repeating-linear-gradient(
-    115deg,
-    var(--dimmer),
-    var(--dimmer) 2px,
-    #1c1f34 2px,
-    #1c1f34 4px
+/*
+  Particle field masking. On wide screens the field is an absolutely
+  positioned layer behind the copy and fades out to the left so it never
+  competes with the headline. Stacked layouts get a self-contained band
+  that fades at the top and bottom edges instead.
+*/
+.field-mask {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
   );
-  color: transparent;
-  border-radius: 3px;
-  user-select: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
+  );
 }
 
-.hairline {
-  background-image: linear-gradient(to right, var(--line) 1px, transparent 1px);
-  background-size: 8px 1px;
+@media (min-width: 1024px) {
+  .field-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.15) 44%,
+      rgba(0, 0, 0, 0.55) 60%,
+      #000 78%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.15) 44%,
+      rgba(0, 0, 0, 0.55) 60%,
+      #000 78%
+    );
+  }
+}
+
+/* The hairline that runs from each pillar number out to its terminal dot. */
+.pillar-rule {
+  background-image: linear-gradient(
+    to right,
+    rgba(252, 252, 252, 0.12),
+    rgba(252, 252, 252, 0.85)
+  );
+}
+
+@keyframes ak-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ak-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ak-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.rise {
+  opacity: 0;
+  animation: ak-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade {
+  opacity: 0;
+  animation: ak-fade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pulse {
+  animation: ak-pulse 1.6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .rise,
+  .fade,
+  .pulse {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
+}
+
+/*
+  ── Application shell ──────────────────────────────────────────────────────
+
+  The authenticated product is the same design system as the landing page at
+  a smaller scale: same ground, same cream/muted ink, same hairlines. These
+  tokens only add the sizes the shell needs; nothing above is redefined.
+*/
+@theme {
+  --text-rail: 0.8125rem; /* nav rail, uppercase */
+  --text-page-title: clamp(1.875rem, 3.4vw, 3rem);
+  --text-page-title--line-height: 1.02;
+  --text-page-title--letter-spacing: -0.035em;
+  --text-page-title--font-weight: 500;
+  --text-metric: clamp(1.375rem, 2.1vw, 1.875rem);
+  --text-metric--line-height: 1.15;
+  --text-metric--letter-spacing: -0.02em;
+
+  --spacing-rail: clamp(12.5rem, 17vw, 16.5rem);
+}
+
+:root {
+  --shell-head: clamp(4rem, 5.2vw, 5rem);
+  --page-pad: clamp(2.25rem, 4vw, 3.75rem);
+  --row-pad: clamp(1.625rem, 2.4vw, 2.375rem);
+}
+
+/*
+  Restrained skeletons. A slow luminance sweep across a hairline-weight bar —
+  visible enough to read as "loading", quiet enough that a page of them still
+  looks like the rest of the product.
+*/
+.skeleton {
+  background-color: rgba(252, 252, 252, 0.05);
+  background-image: linear-gradient(
+    90deg,
+    rgba(252, 252, 252, 0) 0%,
+    rgba(252, 252, 252, 0.07) 50%,
+    rgba(252, 252, 252, 0) 100%
+  );
+  background-size: 220% 100%;
+  animation: ak-shimmer 1.9s ease-in-out infinite;
+  border-radius: 2px;
+}
+
+@keyframes ak-shimmer {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none !important;
+    background-image: none;
+  }
+}
+
+/*
+  A masked value — stands in for a secret that never crosses the boundary.
+*/
+.redacted {
+  font-family: var(--font-mono);
+  background: repeating-linear-gradient(
+    115deg,
+    var(--color-dim),
+    var(--color-dim) 2px,
+    #141414 2px,
+    #141414 4px
+  );
+  color: transparent;
+  border-radius: 2px;
+  user-select: none;
 }
