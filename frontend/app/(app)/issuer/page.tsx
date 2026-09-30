@@ -9,7 +9,10 @@ import {
   updatePrivateState,
   type KreditContractHandle,
 } from '@/lib/providers';
-import { Panel, Field, TextInput, Button, Banner, GateNotice } from '@/components/ui/console';
+import { ContractPanel } from '@/components/app/ContractPanel';
+import { TxProgress } from '@/components/app/TxProgress';
+import { useLedger } from '@/hooks/useLedger';
+import { Page, PageHeader, Panel, Field, TextInput, Button, Banner, GateNotice, Aside, FactList } from '@/components/ui/console';
 
 const CONTRACT_ADDRESS_KEY = 'kredit-contract-address';
 
@@ -37,6 +40,7 @@ export default function IssuerPage() {
   const [contractAddr, setContractAddr] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { state: ledger, refresh: refreshLedger } = useLedger(contractAddr);
 
   useEffect(() => {
     const saved = getContractAddress();
@@ -59,6 +63,7 @@ export default function IssuerPage() {
       setContractAddr(addr);
       setContractAddress(addr);
       setStatus(`Contract deployed at ${addr}`);
+      refreshLedger();
     } catch (err) {
       const deployErr = err as Error & { cause?: unknown; finalizedTxData?: unknown };
       console.error('Deploy error:', deployErr, deployErr.cause, deployErr.finalizedTxData);
@@ -66,7 +71,7 @@ export default function IssuerPage() {
     } finally {
       setLoading(false);
     }
-  }, [connectedApi]);
+  }, [connectedApi, refreshLedger]);
 
   const handleRegisterIssuer = useCallback(async () => {
     if (!connectedApi || !issuerId.trim()) return;
@@ -80,13 +85,14 @@ export default function IssuerPage() {
       const issuerIdBytes = toBytes32(issuerId.trim());
       await callTx.registerIssuer(issuerIdBytes);
       setStatus(`Issuer "${issuerId}" registered on-chain`);
+      refreshLedger();
     } catch (err) {
       console.error('Register issuer error:', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);
     }
-  }, [connectedApi, issuerId, contractAddr]);
+  }, [connectedApi, issuerId, contractAddr, refreshLedger]);
 
   const handleIssue = useCallback(async () => {
     if (!connectedApi || !subjectAddress.trim()) return;
@@ -102,13 +108,14 @@ export default function IssuerPage() {
       updatePrivateState({ score: BigInt(parseInt(score, 10) || 0), holderSecretKey: subjectBytes });
       await callTx.issueCredential(subjectBytes);
       setStatus(`Credential issued for ${subjectAddress.slice(0, 16)}… commitment stored on-chain`);
+      refreshLedger();
     } catch (err) {
       console.error('Issue credential error:', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);
     }
-  }, [connectedApi, subjectAddress, score, contractAddr]);
+  }, [connectedApi, subjectAddress, score, contractAddr, refreshLedger]);
 
   const handleRevoke = useCallback(async () => {
     if (!connectedApi || !subjectAddress.trim()) return;
@@ -122,46 +129,52 @@ export default function IssuerPage() {
       const subjectBytes = toBytes32(subjectAddress.trim());
       await callTx.revokeCredential(subjectBytes);
       setStatus(`Credential revoked for ${subjectAddress.slice(0, 16)}…`);
+      refreshLedger();
     } catch (err) {
       console.error('Revoke credential error:', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);
     }
-  }, [connectedApi, subjectAddress, contractAddr]);
+  }, [connectedApi, subjectAddress, contractAddr, refreshLedger]);
 
   const isError = status?.toLowerCase().includes('error');
+  const outcome = loading || !status ? null : isError ? 'error' : 'success';
+  const orb = loading ? 'working' : outcome === 'error' ? 'fail' : outcome === 'success' ? 'pass' : 'idle';
 
   return (
-    <div className="max-w-2xl">
-      <p className="font-mono text-xs text-dim mb-3">issuer console</p>
-      <h1 className="text-3xl font-medium tracking-tight mb-3">
-        Commit credentials without the score
-      </h1>
-      <p className="text-dim mb-10 max-w-lg leading-relaxed">
+    <Page>
+      <PageHeader eyebrow="Issuer console" title="Commit credentials without the score">
         As admin you deploy the contract and register trusted issuers. As an
         issuer, you commit a subject&apos;s score on-chain — the number itself
         stays with you, off-chain.
-      </p>
+      </PageHeader>
+
+      <ContractPanel
+        address={contractAddr}
+        ledger={ledger}
+        orb={orb}
+        emptyNote="No contract deployed from this browser yet. Connect a wallet and deploy one below."
+      />
 
       {!isConnected ? (
         <GateNotice>Connect a wallet with admin or issuer rights to continue.</GateNotice>
       ) : (
-        <div className="space-y-4">
+        <div className="mt-(--page-pad)">
           <Panel title="Contract" index="01">
             {contractAddr ? (
-              <div className="border border-line rounded-[2px] p-3 mb-5">
-                <p className="text-xs text-dim mb-1">Deployed at</p>
-                <p className="font-mono text-sm break-all text-paper">{contractAddr}</p>
+              <div className="mb-8">
+                <p className="text-label leading-none font-medium tracking-[0.13em] text-dim uppercase">Deployed at</p>
+                <p className="mt-3 font-mono text-[0.9375rem] break-all text-chalk">{contractAddr}</p>
               </div>
             ) : (
-              <Button onClick={handleDeploy} disabled={loading} className="mb-5">
+              <Button onClick={handleDeploy} disabled={loading} className="mb-8">
                 Deploy Kredit contract
               </Button>
             )}
 
-            <div className="space-y-4">
-              <Field label="issuer id" hint="e.g. bank-acme-001">
+            <div className="space-y-5">
+              <Field label="Issuer id" hint="e.g. bank-acme-001">
                 <TextInput
                   value={issuerId}
                   onChange={(e) => setIssuerId(e.target.value)}
@@ -179,15 +192,15 @@ export default function IssuerPage() {
           </Panel>
 
           <Panel title="Credential" index="02">
-            <div className="space-y-4">
-<Field label="subject address" hint="The raw score and salt never touch the chain — only their commitment does.">
+            <div className="space-y-5">
+              <Field label="Subject address" hint="The raw score and salt never touch the chain — only their commitment does.">
                 <TextInput
                   value={subjectAddress}
                   onChange={(e) => setSubjectAddress(e.target.value)}
                   placeholder="mn_addr…"
                 />
               </Field>
-              <Field label="credit score" hint="Committed on-chain; the number itself stays off-chain.">
+              <Field label="Credit score" hint="Committed on-chain; the number itself stays off-chain.">
                 <TextInput
                   type="number"
                   value={score}
@@ -213,20 +226,24 @@ export default function IssuerPage() {
             </div>
           </Panel>
 
+          <TxProgress running={loading} outcome={outcome} />
+
           {status && <Banner tone={isError ? 'fail' : 'info'}>{status}</Banner>}
 
-          <div className="border border-line rounded-[2px] p-5 mt-8">
-            <h3 className="text-sm font-medium mb-3">Sequence</h3>
-            <ol className="text-sm text-dim space-y-1.5">
-              <li>1. Deploy the contract — you become admin.</li>
-              <li>2. Register issuer identities.</li>
-              <li>3. Issue: commitment = persistentCommit(score, salt), stored on-chain.</li>
-              <li>4. The subject receives the raw score through a channel off this protocol.</li>
-              <li>5. The subject proves eligibility later, without revealing the score.</li>
-            </ol>
-          </div>
+          <Aside title="Sequence">
+            <FactList
+              ordered
+              items={[
+                'Deploy the contract — you become admin.',
+                'Register issuer identities.',
+                'Issue: commitment = persistentCommit(score, salt), stored on-chain.',
+                'The subject receives the raw score through a channel off this protocol.',
+                'The subject proves eligibility later, without revealing the score.',
+              ]}
+            />
+          </Aside>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

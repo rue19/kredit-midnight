@@ -4,7 +4,11 @@ import { useState, useCallback } from 'react';
 import { useWallet } from '@/lib/wallet';
 import { findKreditContract, type KreditContractHandle } from '@/lib/providers';
 import { loadPrivateState, generateInitialPrivateState, savePrivateState } from '@/lib/prover';
-import { Panel, Field, TextInput, Button, Banner, GateNotice } from '@/components/ui/console';
+import { ContractPanel } from '@/components/app/ContractPanel';
+import { TxProgress } from '@/components/app/TxProgress';
+import { useLedger } from '@/hooks/useLedger';
+import { useContractAddress } from '@/hooks/useContractAddress';
+import { Page, PageHeader, Panel, Field, TextInput, Button, Banner, GateNotice, Result, Aside, FactList } from '@/components/ui/console';
 
 const CONTRACT_ADDRESS_KEY = 'kredit-contract-address';
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '';
@@ -16,6 +20,8 @@ export default function UserPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [privateStateInfo, setPrivateStateInfo] = useState<string | null>(null);
+  const contractAddress = useContractAddress();
+  const { state: ledger, refresh: refreshLedger } = useLedger(contractAddress);
 
   const handleGenerateKeys = useCallback(() => {
     // Reuse existing keys: regenerating would replace the admin/issuer secrets and orphan the issued credential.
@@ -54,31 +60,33 @@ export default function UserPage() {
       const { callTx } = found as unknown as KreditContractHandle;
       const eligible = await callTx.proveEligibility(BigInt(t));
       setResult({ eligible: Boolean(eligible), threshold: t });
+      refreshLedger();
     } catch (err) {
       console.error('Prove error:', err);
       setError(err instanceof Error ? err.message : 'Proof generation failed');
     } finally {
       setLoading(false);
     }
-  }, [threshold, connectedApi]);
+  }, [threshold, connectedApi, refreshLedger]);
+
+  const outcome = loading ? null : error ? 'error' : result ? 'success' : null;
+  const orb = loading ? 'working' : error ? 'fail' : result ? (result.eligible ? 'pass' : 'fail') : 'idle';
 
   return (
-    <div className="max-w-2xl">
-      <p className="font-mono text-xs text-dim mb-3">holder</p>
-      <h1 className="text-3xl font-medium tracking-tight mb-3">
-        Prove eligibility, keep the number
-      </h1>
-      <p className="text-dim mb-10 max-w-lg leading-relaxed">
+    <Page>
+      <PageHeader eyebrow="Holder" title="Prove eligibility, keep the number">
         Your score and salt live only in this browser. A proof crosses the
         privacy boundary as a single boolean — the value behind it never does.
-      </p>
+      </PageHeader>
+
+      <ContractPanel address={contractAddress} ledger={ledger} orb={orb} />
 
       {!isConnected ? (
         <GateNotice>Connect your wallet to generate a proof.</GateNotice>
       ) : (
-        <div className="space-y-4">
+        <div className="mt-(--page-pad)">
           <Panel title="Local keys" index="01">
-            <p className="text-sm text-dim mb-4 leading-relaxed">
+            <p className="text-fine mb-6 max-w-[46ch] leading-relaxed text-faint">
               Generate a keypair and score. They stay in this browser and are
               never transmitted.
             </p>
@@ -92,9 +100,9 @@ export default function UserPage() {
           </Panel>
 
           <Panel title="Eligibility proof" index="02">
-            <div className="space-y-4">
+            <div className="space-y-5">
               <Field
-                label="threshold"
+                label="Threshold"
                 hint={`The verifier will learn only whether your score ≥ ${threshold || '?'}`}
               >
                 <TextInput
@@ -104,43 +112,40 @@ export default function UserPage() {
                   placeholder="700"
                 />
               </Field>
-              <Button onClick={handleProve} disabled={loading || !threshold}>
+              <Button onClick={handleProve} disabled={loading || !threshold || !contractAddress}>
                 {loading ? 'Generating proof…' : 'Generate proof'}
               </Button>
+              {!contractAddress && (
+                <p className="text-[0.75rem] text-dim">
+                  No contract deployed. Ask the admin to deploy the Kredit contract first.
+                </p>
+              )}
             </div>
           </Panel>
 
+          <TxProgress running={loading} outcome={outcome} />
+
           {result && (
-            <div
-              className={`border rounded-[2px] p-6 ${
-                result.eligible ? 'border-pass/30 bg-pass/5' : 'border-fail/30 bg-fail/5'
-              }`}
-            >
-              <h3
-                className={`font-mono text-sm mb-2 ${result.eligible ? 'text-pass' : 'text-fail'}`}
-              >
-                {result.eligible ? 'eligible' : 'not eligible'}
-              </h3>
-              <p className="text-sm text-dim leading-relaxed">
-                score &ge; {result.threshold} was proven on-chain. Your actual
-                score was never disclosed.
-              </p>
-            </div>
+            <Result pass={result.eligible} label={result.eligible ? 'Eligible' : 'Not eligible'}>
+              score &ge; {result.threshold} was proven on-chain. Your actual
+              score was never disclosed.
+            </Result>
           )}
 
           {error && <Banner tone="fail">{error}</Banner>}
 
-          <div className="border border-line rounded-[2px] p-5 mt-8">
-            <h3 className="text-sm font-medium mb-3">What stays local</h3>
-            <ul className="text-sm text-dim space-y-1.5">
-              <li>Your score is never sent over the network.</li>
-              <li>Only the boolean result — eligible or not — reaches the chain.</li>
-              <li>The commitment salt is never revealed.</li>
-              <li>Proof generation runs locally; private inputs never leave this machine.</li>
-            </ul>
-          </div>
+          <Aside title="What stays local">
+            <FactList
+              items={[
+                'Your score is never sent over the network.',
+                'Only the boolean result — eligible or not — reaches the chain.',
+                'The commitment salt is never revealed.',
+                'Proof generation runs locally; private inputs never leave this machine.',
+              ]}
+            />
+          </Aside>
         </div>
       )}
-    </div>
+    </Page>
   );
 }
