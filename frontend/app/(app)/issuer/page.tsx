@@ -5,6 +5,7 @@ import { useWallet } from '@/lib/wallet';
 import {
   deployKreditContract,
   findKreditContract,
+  logTxError,
   stringifyError,
   updatePrivateState,
   type KreditContractHandle,
@@ -66,7 +67,7 @@ export default function IssuerPage() {
       refreshLedger();
     } catch (err) {
       const deployErr = err as Error & { cause?: unknown; finalizedTxData?: unknown };
-      console.error('Deploy error:', deployErr, deployErr.cause, deployErr.finalizedTxData);
+      logTxError('Deploy error', deployErr, deployErr.cause, deployErr.finalizedTxData);
       setStatus(`Deploy error: ${stringifyError(err)}`);
     } finally {
       setLoading(false);
@@ -87,7 +88,7 @@ export default function IssuerPage() {
       setStatus(`Issuer "${issuerId}" registered on-chain`);
       refreshLedger();
     } catch (err) {
-      console.error('Register issuer error:', err);
+      logTxError('Register issuer error', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);
@@ -110,7 +111,7 @@ export default function IssuerPage() {
       setStatus(`Credential issued for ${subjectAddress.slice(0, 16)}… commitment stored on-chain`);
       refreshLedger();
     } catch (err) {
-      console.error('Issue credential error:', err);
+      logTxError('Issue credential error', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);
@@ -131,7 +132,7 @@ export default function IssuerPage() {
       setStatus(`Credential revoked for ${subjectAddress.slice(0, 16)}…`);
       refreshLedger();
     } catch (err) {
-      console.error('Revoke credential error:', err);
+      logTxError('Revoke credential error', err);
       setStatus(`Error: ${err instanceof Error ? err.message : 'Unknown'}`);
     } finally {
       setLoading(false);

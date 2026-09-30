@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useWallet } from '@/lib/wallet';
-import { findKreditContract, type KreditContractHandle } from '@/lib/providers';
+import { findKreditContract, logTxError, type KreditContractHandle } from '@/lib/providers';
 import { ContractPanel } from '@/components/app/ContractPanel';
 import { TxProgress } from '@/components/app/TxProgress';
 import { useLedger } from '@/hooks/useLedger';
@@ -46,7 +46,7 @@ export default function VerifyPage() {
       });
       refreshLedger();
     } catch (err) {
-      console.error('Verify error:', err);
+      logTxError('Verify error', err);
       setError(err instanceof Error ? err.message : 'Verification failed');
     } finally {
       setLoading(false);

@@ -71,6 +71,16 @@ export function onStage(listener: (event: StageEvent) => void): () => void {
 
 const emitStage = (event: StageEvent) => stageListeners.forEach((listener) => listener(event));
 
+const CANCELLED = 'Transaction cancelled — it was rejected in Lace. Nothing was submitted.';
+
+/** Logs a failed contract action; a rejection in Lace is a warning, not an error. */
+export function logTxError(label: string, ...details: unknown[]): void {
+  const first = details[0];
+  const message = first instanceof Error ? first.message : String(first);
+  if (message === CANCELLED) console.warn(`${label}: cancelled in wallet`);
+  else console.error(label, ...details);
+}
+
 async function stage<T>(name: string, fn: () => Promise<T>): Promise<T> {
   console.log(`[Kredit] ${name}...`);
   emitStage({ name, status: 'start' });
@@ -80,8 +90,14 @@ async function stage<T>(name: string, fn: () => Promise<T>): Promise<T> {
     return result;
   } catch (err) {
     emitStage({ name, status: 'fail' });
-    console.error(`[Kredit] ${name} failed:`, err);
     const details = stringifyError(err);
+    // Rejecting (or closing) Lace's approval prompt is a cancellation, not a
+    // failure: warn so the Next.js dev overlay doesn't report it as a crash.
+    if (/user rejected|rejected by user|user denied/i.test(details)) {
+      console.warn(`[Kredit] ${name} cancelled in wallet`);
+      throw new Error(CANCELLED, { cause: err });
+    }
+    console.error(`[Kredit] ${name} failed:`, err);
     if (details.includes('could not balance dust')) {
       throw new Error(
         'Your wallet has no DUST to pay transaction fees. In Lace, get tNIGHT from the ' +

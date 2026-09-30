@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useWallet } from '@/lib/wallet';
-import { findKreditContract, type KreditContractHandle } from '@/lib/providers';
+import { findKreditContract, logTxError, type KreditContractHandle } from '@/lib/providers';
 import { loadPrivateState, generateInitialPrivateState, savePrivateState } from '@/lib/prover';
 import { ContractPanel } from '@/components/app/ContractPanel';
 import { TxProgress } from '@/components/app/TxProgress';
@@ -62,7 +62,7 @@ export default function UserPage() {
       setResult({ eligible: Boolean(eligible), threshold: t });
       refreshLedger();
     } catch (err) {
-      console.error('Prove error:', err);
+      logTxError('Prove error', err);
       setError(err instanceof Error ? err.message : 'Proof generation failed');
     } finally {
       setLoading(false);
