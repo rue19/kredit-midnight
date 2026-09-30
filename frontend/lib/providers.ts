@@ -10,6 +10,7 @@ import type {
 import type { KreditCircuitName, KreditPrivateState } from 'kredit-api';
 import type { CompiledContract } from '@midnight-ntwrk/compact-js';
 import { loadPrivateState, savePrivateState } from './prover';
+import { network } from '@/config/network';
 
 export type KreditContractHandle = {
   callTx: {
@@ -56,11 +57,29 @@ export function stringifyError(value: unknown): string {
   }
 }
 
+export type StageEvent = { name: string; status: 'start' | 'done' | 'fail' };
+
+const stageListeners = new Set<(event: StageEvent) => void>();
+
+// Lets the UI follow a transaction through proving, signing and submission.
+export function onStage(listener: (event: StageEvent) => void): () => void {
+  stageListeners.add(listener);
+  return () => {
+    stageListeners.delete(listener);
+  };
+}
+
+const emitStage = (event: StageEvent) => stageListeners.forEach((listener) => listener(event));
+
 async function stage<T>(name: string, fn: () => Promise<T>): Promise<T> {
   console.log(`[Kredit] ${name}...`);
+  emitStage({ name, status: 'start' });
   try {
-    return await fn();
+    const result = await fn();
+    emitStage({ name, status: 'done' });
+    return result;
   } catch (err) {
+    emitStage({ name, status: 'fail' });
     console.error(`[Kredit] ${name} failed:`, err);
     const details = stringifyError(err);
     if (details.includes('could not balance dust')) {
@@ -163,14 +182,14 @@ async function createProviders(connectedApi: ConnectedAPI) {
   if (!coinKey || typeof coinKey !== 'string' || coinKey.length < 10) {
     throw new Error(
       'Wallet shielded coin public key is not available. ' +
-      'Make sure the Lace wallet has shielded keys initialized on the Preprod network.'
+      `Make sure the Lace wallet has shielded keys initialized on the ${network.label} network.`
     );
   }
 
   if (!encKey || typeof encKey !== 'string' || encKey.length < 10) {
     throw new Error(
       'Wallet encryption public key is not available. ' +
-      'Make sure the Lace wallet has shielded keys initialized on the Preprod network.'
+      `Make sure the Lace wallet has shielded keys initialized on the ${network.label} network.`
     );
   }
 
